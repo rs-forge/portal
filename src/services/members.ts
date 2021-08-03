@@ -41,7 +41,7 @@ export interface GetMembersResponse extends Pagination {
 
 export const membersApi = createApi({
     reducerPath: 'membersApi',
-    baseQuery: graphqlRequestBaseQuery({ url: ' /qraphql' }),
+    baseQuery: graphqlRequestBaseQuery({ url: 'mongodb://client:HermesDualSense@localhost:27017/rs-forge' }),
     tagTypes: ['Member'],
     endpoints: (builder) => ({
         getMembers: builder.query<GetMembersResponse, { page?: number; per_page?: number }>({
