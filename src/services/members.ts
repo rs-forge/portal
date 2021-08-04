@@ -41,23 +41,23 @@ export interface GetMembersResponse extends Pagination {
 
 export const membersApi = createApi({
     reducerPath: 'membersApi',
-    baseQuery: graphqlRequestBaseQuery({ url: 'mongodb://client:HermesDualSense@localhost:27017/rs-forge' }),
+    baseQuery: graphqlRequestBaseQuery({ url: 'localhost:4000/graphql' }),
     tagTypes: ['Member'],
     endpoints: (builder) => ({
-        getMembers: builder.query<GetMembersResponse, { page?: number; per_page?: number }>({
-            query: ({ page, per_page }) => ({
+        getMembers: builder.query<GetMembersResponse, { limit?: number; offset?: number }>({
+            query: ({ limit, offset }) => ({
                 document: gql`
-                    query GetMembers($page: Int = 1, $per_page: Int = 10) {
-                        members(page: $page, per_page: $per_page) {
-                            id
+                    query {
+                        findMembers(page: {limit: $limit, offset: $offset}}) {
+                            items {
                             name
-                            instruments
+                            }
                         }
                     }
                 `,
                 variables: {
-                    page,
-                    per_page,
+                    limit,
+                    offset,
                 },
             })
         }),
