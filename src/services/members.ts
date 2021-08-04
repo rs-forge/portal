@@ -3,7 +3,7 @@ import { gql } from 'graphql-request';
 import { graphqlRequestBaseQuery } from '@rtk-query/graphql-request-base-query';
 
 export interface Member {
-    id: string,
+    _id: string,
     name: string,
     instruments: Instrument[]
 }
@@ -21,37 +21,37 @@ export enum Instrument {
 }
 
 export interface Pagination {
-    page: number
-    per_page: number
-    total: number
-    total_pages: number
+    limit: number
+    offset: number
+    count: number
 }
 
 export interface MemberResponse {
-    data: {
-        member: Member
-    }
+    member: Member
 }
 
 export interface GetMembersResponse extends Pagination {
-    data: {
-        members: Member[]
-    }
+    members: Member[]
 }
 
 export const membersApi = createApi({
     reducerPath: 'membersApi',
-    baseQuery: graphqlRequestBaseQuery({ url: 'localhost/graphql' }),
+    baseQuery: graphqlRequestBaseQuery({ url: '/graphql' }),
     tagTypes: ['Member'],
     endpoints: (builder) => ({
         getMembers: builder.query<GetMembersResponse, { limit?: number; offset?: number }>({
             query: ({ limit, offset }) => ({
                 document: gql`
-                    query {
-                        findMembers(page: {limit: $limit, offset: $offset}}) {
+                    query FindMembers($limit: Int, $offset: Int) {
+                        findMembers(page: {limit: $limit, offset: $offset}) {
                             items {
-                            name
+                                _id
+                                name
+                                instruments
                             }
+                            limit
+                            offset
+                            count
                         }
                     }
                 `,
@@ -59,22 +59,25 @@ export const membersApi = createApi({
                     limit,
                     offset,
                 },
-            })
+            }),
+            transformResponse: (response: any) => ({ members: response.findMembers.items, limit: response.findMembers.limit, offset: response.findMembers.offset, count: response.findMembers.count }),
+            providesTags: (result, error, queryArgs) => result?.members.map(member => ({ type: 'Member', id: member._id })) ?? ['Member']
         }),
         getMember: builder.query<Member, string>({
             query: (id) => ({
               document: gql`
-                query GetMember($id: ID!) {
-                    member(id: ${id}) {
-                    id
+                query GetMember($id: GraphbackObjectID!) {
+                    getMember(id: $id) {
+                        _id
                         name
                         instruments
                     }
                 }
               `,
+              variables: { id }
             }),
-            transformResponse: (response: MemberResponse) => response.data.member,
-            providesTags: (result, error, id) => [{ type: 'Member', id }] //TODO find out what this is
+            transformResponse: (response: any) => response.getMember,
+            providesTags: (result, error, queryArgs) => [{ type: 'Member', id: result?._id  ?? queryArgs }]
           }),
     })
 })

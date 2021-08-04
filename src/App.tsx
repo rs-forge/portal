@@ -2,27 +2,27 @@ import './App.css';
 import { useGetMembersQuery } from './services/members';
 
 function App() {
-  const { data, isError, isLoading } = useGetMembersQuery({});
+  const { data, isError, isLoading, error } = useGetMembersQuery({});
 
   return (
     <div className="App">
       {isError ? (
-        <>Oh no, there was an error</>
+        <>Oh no, there was an error: {error}</>
       ) : isLoading ? (
         <>Loading...</>
       ) : data ? (
         <>
           <h3>Members</h3>
-          {data.data.members.forEach(member => {
+          {data.members.map(member => 
             <div>
               <p>Name: {member.name}</p>
               <ul>
-                {member.instruments.map(instrument => {
-                  return <li>{instrument.valueOf()}</li>
-                })}
+                {member.instruments.map(instrument =>
+                  <li>{instrument.valueOf()}</li>
+                )}
               </ul>
             </div>
-          })}
+          )}
         </>
       ) : null}
     </div>
