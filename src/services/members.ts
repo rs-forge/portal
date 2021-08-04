@@ -41,7 +41,7 @@ export interface GetMembersResponse extends Pagination {
 
 export const membersApi = createApi({
     reducerPath: 'membersApi',
-    baseQuery: graphqlRequestBaseQuery({ url: 'localhost:4000/graphql' }),
+    baseQuery: graphqlRequestBaseQuery({ url: 'localhost/graphql' }),
     tagTypes: ['Member'],
     endpoints: (builder) => ({
         getMembers: builder.query<GetMembersResponse, { limit?: number; offset?: number }>({
